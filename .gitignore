@@ -1,3 +1,6 @@
+#USER ADDED FILES:
+/Esp32Server/secret.h
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
