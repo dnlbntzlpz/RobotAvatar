@@ -22,7 +22,7 @@ const int pin1 = 13;  // Left Joystick - Top Servo
 const int pin2 = 12;  // Left Joystick - Bottom Servo
 const int pin3 = 25;  // Right Joystick - Top Servo
 const int pin4 = 26;  // Right Joystick - Bottom Servo
-const int pin5 = 27;  // Extra (no usado)
+const int pin5 = 27;  // Right Action Button Servo
 const int pin6 = 14;  // Left Select Button Servo
 
 // ================================================================
