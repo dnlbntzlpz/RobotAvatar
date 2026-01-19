@@ -2,13 +2,16 @@
 #include <ESP32Servo.h>
 
 // Wi-Fi / Server settings
-#include "secrets.h"     // define WIFI_SSID, WIFI_PASS, SERVER_HOST, SERVER_PORT
+#include "secret.h"     // define WIFI_SSID, WIFI_PASS, SERVER_HOST, SERVER_PORT
+
+//Function Declaration
+void handleGestureCommand(const String& cmd);
 
 // ================================================================
 // ⚙️ CONFIGURACIÓN WiFi
 // ================================================================
-const char* ssid = "WIFI_SSID";
-const char* password = "WIFI_PASS";
+const char* ssid = WIFI_SSID;
+const char* password = WIFI_PASS;
 
 WiFiServer server(12345);
 
@@ -25,6 +28,8 @@ const int pin4 = 26;  // Right Joystick - Bottom Servo
 const int pin5 = 27;  // Right Action Button Servo
 const int pin6 = 14;  // Left Select Button Servo
 
+// Servo Homes:
+
 // ================================================================
 // 🦾 FUNCIONES DE MOVIMIENTO
 // ================================================================
@@ -40,9 +45,10 @@ void moverBrazoDerecho(int serv3, int serv4) {
   Serial.printf("Brazo DERECHO → [%d, %d]\n", serv3, serv4);
 }
 
-void moverGesto(int serv5, int serv6) {
-  servo5.write(constrain(servo5, 0, 180));
-  servo6.write(constrain(servo6, 0, 180));
+void moverGesto(int serv5, int serv6) { 
+  servo5.write(constrain(serv5, 0, 180));
+  delay(500);
+  servo6.write(constrain(serv6, 0, 180));
   Serial.printf("Gesto → [%d, %d]\n", serv5, serv6);
 }
 
@@ -63,14 +69,13 @@ void setup() {
   // Posición inicial
   moverBrazoIzquierdo(30, 150);
   moverBrazoDerecho(110, 110);
-  servo5.write(90);
-  servo6.write(90);
+  moverGesto(90, 150);
 
   // Conexión WiFi
   WiFi.begin(ssid, password);
   Serial.print("Conectando a WiFi");
   while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
+    delay(1000);
     Serial.print(".");
   }
 
@@ -99,6 +104,9 @@ void loop() {
 
         Serial.print("📩 Datos recibidos: ");
         Serial.println(data);
+
+        // Handle gesture servos FIRST
+        handleGestureCommand(data);
 
         // Esperamos formato "R#,L#"
         int commaIndex = data.indexOf(',');
@@ -155,3 +163,18 @@ void loop() {
   }
 }
 
+//FUNCTIONS:
+void handleGestureCommand(const String& cmd) {
+  if (cmd == "A,A") {
+    // Gesture A
+    moverGesto(80, 180);
+  }
+  else if (cmd == "B,B") {
+    // Gesture B
+    moverGesto(100, 180);
+  }
+  else {
+    // No gesture active → return to neutral
+    moverGesto(90, 150);
+  }
+}
