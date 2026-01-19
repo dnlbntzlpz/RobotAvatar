@@ -15,7 +15,8 @@ warnings.filterwarnings("ignore", message="SymbolDatabase.GetPrototype.*", categ
 # ================================================================
 # CONFIG SERVIDOR ESP32
 # ================================================================
-ESP32_IP = "192.168.10.175"
+#ESP32_IP = "192.168.10.175" #Old IP
+ESP32_IP = "192.168.10.123"
 PORT = 12345
 
 # ================================================================
@@ -645,7 +646,8 @@ def receive_thread():
 def camera_thread():
     global latest_frame, running
 
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(0) #Built-in camera
+    #cap = cv2.VideoCapture(1) #External camera
     cap.set(3, 640)
     cap.set(4, 360)
 
