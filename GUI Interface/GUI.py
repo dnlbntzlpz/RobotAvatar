@@ -16,7 +16,7 @@ warnings.filterwarnings("ignore", message="SymbolDatabase.GetPrototype.*", categ
 # CONFIG SERVIDOR ESP32
 # ================================================================
 #ESP32_IP = "192.168.10.175" #Old IP
-ESP32_IP = "192.168.10.123"
+ESP32_IP = "192.168.10.106"
 PORT = 12345
 
 # ================================================================
@@ -33,7 +33,7 @@ latest_right_name = "Quieto"
 
 client = None
 connected = False
-manual_mode = False
+manual_mode = True
 connection_in_progress = False
 
 frame_lock = threading.Lock()
@@ -141,7 +141,7 @@ btn_calibrate.grid(row=7, column=0, columnspan=3, pady=(5, 10))
 # ================================================================
 # MODO MANUAL
 # ================================================================
-manual_var = BooleanVar(value=False)
+manual_var = BooleanVar(value=True)
 
 def toggle_manual():
     global manual_mode, latest_left_code, latest_left_name, latest_right_code, latest_right_name
@@ -514,6 +514,7 @@ def connect_worker():
             c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             c.settimeout(2)  # a bit more generous
             c.connect((ESP32_IP, PORT))
+            c.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
 
             c.settimeout(None)
 
@@ -606,7 +607,7 @@ def communication_thread():
         else:
             was_connected = False
 
-        time.sleep(0.05)
+        time.sleep(0.01)
 
 def receive_thread():
     global client, connected, running
@@ -674,7 +675,7 @@ from collections import deque
 # -----------------------
 # Lean toggle controls
 # -----------------------
-lean_enabled = True  # default OFF
+lean_enabled = False  # default OFF
 
 def toggle_lean():
     global lean_enabled
@@ -712,23 +713,23 @@ def body_control_thread():
     # -----------------------
     # Tunable parameters
     # -----------------------
-    EMA_ALPHA = 0.25
+    EMA_ALPHA = 0.35
 
     # Yaw hysteresis
     YAW_ON  = 0.08
     YAW_OFF = 0.05
 
     # Lean hysteresis
-    LEAN_ON  = 0.09
-    LEAN_OFF = 0.07
+    LEAN_ON  = 0.12
+    LEAN_OFF = 0.08
 
     # Flip if directions are backwards (camera mirroring)
     YAW_SIGN  = 1.0
     LEAN_SIGN = -1.0
 
     # Roll (lean left/right) hysteresis (normalized)
-    ROLL_ON  = 0.40
-    ROLL_OFF = 0.30
+    ROLL_ON  = 0.35
+    ROLL_OFF = 0.25
     ROLL_SIGN = -1.0  # flip if left/right is inverted
 
     roll0 = 0.0
@@ -964,6 +965,7 @@ def body_control_thread():
                 # Collect new baselines (~1s)
                 neutral_yaw = []
                 neutral_lean = []
+                neutral_roll = []
                 calib_start = time.time()
 
                 while running and (time.time() - calib_start) < 1.0:
@@ -982,7 +984,7 @@ def body_control_thread():
                             latest_pose_landmarks = results.pose_landmarks
 
                         lm = results.pose_landmarks.landmark
-                        y_raw, l_raw, *_ = compute_yaw_lean_roll(lm)
+                        y_raw, l_raw, r_raw, *_ = compute_yaw_lean_roll(lm)
                         neutral_yaw.append(y_raw)
                         neutral_lean.append(l_raw)
                         neutral_roll.append(r_raw)
@@ -991,8 +993,9 @@ def body_control_thread():
 
                 yaw0 = (sum(neutral_yaw) / len(neutral_yaw)) if neutral_yaw else yaw0
                 lean0 = (sum(neutral_lean) / len(neutral_lean)) if neutral_lean else lean0
+                roll0 = (sum(neutral_roll) / len(neutral_roll)) if neutral_roll else roll0
 
-                print(f"[BodyControl] Recalibrated yaw0={yaw0:.4f}, lean0={lean0:.4f}")
+                print(f"[BodyControl] Recalibrated yaw0={yaw0:.4f}, lean0={lean0:.4f}, roll0={roll0:.4f}")
                 continue  # skip rest of this loop iteration
 
             if latest_frame is None or manual_mode:
@@ -1164,7 +1167,7 @@ def body_control_thread():
                     latest_right_code = "1"
                     latest_right_name = "Neutral"
 
-            time.sleep(0.02)
+            #time.sleep(0.02)
 
 # ================================================================
 # UPDATE GUI
@@ -1224,7 +1227,7 @@ def update_gui():
         )
 
     if running:
-        root.after(50, update_gui)
+        root.after(10, update_gui)
 
 
 # ================================================================
