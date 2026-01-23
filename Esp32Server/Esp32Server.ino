@@ -67,8 +67,8 @@ void setup() {
   servo6.attach(pin6);
 
   // Posición inicial
-  moverBrazoIzquierdo(30, 150);
-  moverBrazoDerecho(110, 110);
+  moverBrazoIzquierdo(90, 90);
+  moverBrazoDerecho(90, 90);
   moverGesto(90, 150);
 
   // Conexión WiFi
@@ -128,11 +128,11 @@ void loop() {
           }
 
           switch (gestureL) {
-            case 1: moverBrazoIzquierdo(30, 150); /* client.println("L1 OK Quieto"); */ break;
-            case 2: moverBrazoIzquierdo(5, 100);    /* client.println("L2 OK Arriba"); */ break;
-            case 3: moverBrazoIzquierdo(90, 80);  /* client.println("L3 OK Izquierda"); */ break;
-            case 4: moverBrazoIzquierdo(5, 175);  /* client.println("L4 OK Derecha"); */ break;
-            case 5: moverBrazoIzquierdo(80,170); /* client.println("L5 OK Atrás"); */ break;
+            case 1: moverBrazoIzquierdo(90, 90); /* client.println("L1 OK Quieto"); */ break;
+            case 2: moverBrazoIzquierdo(65, 55);    /* client.println("L2 OK Arriba"); */ break;
+            case 3: moverBrazoIzquierdo(140, 40);  /* client.println("L3 OK Izquierda"); */ break;
+            case 4: moverBrazoIzquierdo(40, 140);  /* client.println("L4 OK Derecha"); */ break;
+            case 5: moverBrazoIzquierdo(135,115); /* client.println("L5 OK Atrás"); */ break;
             default: /* client.println("L Error gesto inválido"); */ break;
           }
         }
@@ -147,11 +147,11 @@ void loop() {
           }
 
           switch (gestureR) {
-            case 1: moverBrazoDerecho(110,110);   /* client.println("R1 OK Centro"); */ break;
-            case 2: moverBrazoDerecho(150,170);   /* client.println("R2 OK Arriba"); */ break;
-            case 3: moverBrazoDerecho(170,50);     /* client.println("R3 OK Izquierda"); */ break;
-            case 4: moverBrazoDerecho(50,170);    /* client.println("R4 OK Derecha"); */ break;
-            case 5: moverBrazoDerecho(70,90);       /* client.println("R5 OK Abajo"); */ break;
+            case 1: moverBrazoDerecho(90,90);   /* client.println("R1 OK Centro"); */ break;
+            case 2: moverBrazoDerecho(125,125);   /* client.println("R2 OK Arriba"); */ break;
+            case 3: moverBrazoDerecho(160,30);     /* client.println("R3 OK Izquierda"); */ break;
+            case 4: moverBrazoDerecho(30,160);    /* client.println("R4 OK Derecha"); */ break;
+            case 5: moverBrazoDerecho(65,65);       /* client.println("R5 OK Abajo"); */ break;
             default: /* client.println("R Error gesto inválido"); */ break;
           }
         }
