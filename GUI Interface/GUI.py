@@ -143,15 +143,27 @@ btn_calibrate.grid(row=7, column=0, columnspan=3, pady=(5, 10))
 # ================================================================
 manual_var = BooleanVar(value=True)
 
+def force_neutral():
+    global latest_left_code, latest_left_name
+    global latest_right_code, latest_right_name
+
+    with gesture_lock:
+        latest_left_code  = "1"
+        latest_left_name  = "Neutral"
+        latest_right_code = "1"
+        latest_right_name = "Neutral"
+
 def toggle_manual():
-    global manual_mode, latest_left_code, latest_left_name, latest_right_code, latest_right_name
+    global manual_mode
     manual_mode = manual_var.get()
+
+    # Always force a neutral command when switching modes
+    force_neutral()
+
     if manual_mode:
-        with gesture_lock:
-            latest_left_code = "1"
-            latest_left_name = "Quieto"
-            latest_right_code = "1"
-            latest_right_name = "Quieto"
+        print("[MODE] Switched to MANUAL → sending NEUTRAL")
+    else:
+        print("[MODE] Switched to CAMERA → sending NEUTRAL")
 
 manual_check = Checkbutton(
     control_frame,
@@ -671,6 +683,10 @@ def camera_thread():
 # ================================================================
 import time
 from collections import deque
+import math
+
+# persistent lockout to avoid A → B confusion
+_last_raise_time = 0.0
 
 # -----------------------
 # Lean toggle controls
@@ -814,22 +830,82 @@ def body_control_thread():
         """
         Returns: None, "A", or "B"
         A = right hand raised
-        B = right hand forward (toward camera)
+        B = right hand forward (deliberate push)
         """
-        shR = lm[12]
-        wrR = lm[16]
+        global _last_raise_time
 
-        dy = shR.y - wrR.y          # positive if wrist is ABOVE shoulder
-        dz = shR.z - wrR.z          # positive if wrist is MORE FORWARD than shoulder (toward camera)
+        sh = lm[12]   # right shoulder
+        el = lm[14]   # right elbow
+        wr = lm[16]   # right wrist
 
-        is_A = dy > RIGHT_HAND_RAISE_DY
-        is_B = dz > RIGHT_HAND_FWD_DZ
+        # Arm vector (shoulder -> wrist)
+        dx = wr.x - sh.x
+        dy = wr.y - sh.y
+        dz = wr.z - sh.z
 
-        # If both happen, prefer A
-        if is_A:
+        # ---------
+        # Angles
+        # ---------
+        # Elevation: how much the arm points UP
+        elev = math.degrees(
+            math.atan2(-dy, math.sqrt(dx*dx + dz*dz) + 1e-9)
+        )
+
+        # Forward: how much the arm points TOWARD CAMERA
+        fwd = math.degrees(
+            math.atan2(-dz, math.sqrt(dx*dx + dy*dy) + 1e-9)
+        )
+
+        # Elbow extension angle (straight arm check)
+        def angle_3pts(a, b, c):
+            ab = (a.x-b.x, a.y-b.y, a.z-b.z)
+            cb = (c.x-b.x, c.y-b.y, c.z-b.z)
+            dot = ab[0]*cb[0] + ab[1]*cb[1] + ab[2]*cb[2]
+            nab = math.sqrt(ab[0]**2 + ab[1]**2 + ab[2]**2) + 1e-9
+            ncb = math.sqrt(cb[0]**2 + cb[1]**2 + cb[2]**2) + 1e-9
+            cosang = max(-1.0, min(1.0, dot/(nab*ncb)))
+            return math.degrees(math.acos(cosang))
+
+        elbow = angle_3pts(sh, el, wr)
+
+        # ---------
+        # Tunables (start here)
+        # ---------
+        ELEV_ON   = 35    # degrees → clearly raised
+        FWD_ON    = 3205    # degrees → clearly forward
+        ELBOW_ON  = 135   # degrees → arm fairly straight
+        RAISE_LOCK = 0.35 # seconds
+
+        ELEV_UP_MIN = 10      # degrees (above shoulder line)
+        ELEV_DOWN_MAX = -15  # degrees (below shoulder line)
+
+        FWD_MIN = 25         # degrees
+
+
+        now = time.time()
+
+        print(
+            f"elev={elev:.1f}°  fwd={fwd:.1f}°  elbow={elbow:.1f}°",
+            end="\r"
+        )
+
+        # ---------
+        # Gesture A: RAISE (wins)
+        # ---------
+        if elev > ELEV_UP_MIN and fwd > FWD_MIN:
+            _last_raise_time = now
             return "A"
-        if is_B:
+
+        # Ignore forward shortly after a raise motion
+        if (now - _last_raise_time) < RAISE_LOCK:
+            return None
+
+        # ---------
+        # Gesture B: FORWARD (deliberate push)
+        # ---------
+        if elev < ELEV_DOWN_MAX and fwd > FWD_MIN:
             return "B"
+
         return None
 
     def update_walk_in_place(lm, sh_c, hip_c):
