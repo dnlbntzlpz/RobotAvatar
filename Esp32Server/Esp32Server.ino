@@ -6,6 +6,7 @@
 
 //Function Declaration
 void handleGestureCommand(const String& cmd);
+void handleHandshakeToggle(bool gestureBActive);
 
 // ================================================================
 // ⚙️ CONFIGURACIÓN WiFi
@@ -165,20 +166,26 @@ void loop() {
 
 //FUNCTIONS:
 void handleGestureCommand(const String& cmd) {
-  if (cmd == "A,A") {
-    // Gesture A
+  // Persistent state: was B active last time?
+  static bool lastB = false;
+
+  const bool isB = (cmd == "B,B");
+  const bool isA = (cmd == "A,A");
+
+  // Gesture A: momentary press+release (optional)
+  if (isA) {
     moverGesto(80, 180);
-    delay(1000);
+    delay(1000);              // keep short to avoid blocking networking
     moverGesto(90, 150);
+    return;
   }
-  else if (cmd == "B,B") {
-    // Gesture B
-    moverGesto(100, 180);
-    delay(1000);
-    moverGesto(90, 150);
+
+  // Gesture B: trigger on BOTH edges (enter and exit)
+  if (isB != lastB) {        // edge detected (false->true or true->false)
+    moverGesto(100, 180);    // "press"
+    delay(1000);              // short press
+    moverGesto(90, 150);     // "release"
   }
-  else {
-    // No gesture active → return to neutral
-    moverGesto(90, 150);
-  }
+
+  lastB = isB;
 }
