@@ -168,10 +168,14 @@ void handleGestureCommand(const String& cmd) {
   if (cmd == "A,A") {
     // Gesture A
     moverGesto(80, 180);
+    delay(1000);
+    moverGesto(90, 150);
   }
   else if (cmd == "B,B") {
     // Gesture B
     moverGesto(100, 180);
+    delay(1000);
+    moverGesto(90, 150);
   }
   else {
     // No gesture active → return to neutral
