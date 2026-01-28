@@ -174,7 +174,7 @@ void handleGestureCommand(const String& cmd) {
 
   // Gesture A: momentary press+release (optional)
   if (isA) {
-    moverGesto(80, 180);
+    moverGesto(70, 180);
     delay(1000);              // keep short to avoid blocking networking
     moverGesto(90, 150);
     return;
@@ -182,7 +182,7 @@ void handleGestureCommand(const String& cmd) {
 
   // Gesture B: trigger on BOTH edges (enter and exit)
   if (isB != lastB) {        // edge detected (false->true or true->false)
-    moverGesto(100, 180);    // "press"
+    moverGesto(110, 180);    // "press"
     delay(1000);              // short press
     moverGesto(90, 150);     // "release"
   }
