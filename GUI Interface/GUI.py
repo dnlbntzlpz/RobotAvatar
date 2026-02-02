@@ -16,7 +16,8 @@ warnings.filterwarnings("ignore", message="SymbolDatabase.GetPrototype.*", categ
 # CONFIG SERVIDOR ESP32
 # ================================================================
 #ESP32_IP = "192.168.10.175" #Old IP
-ESP32_IP = "192.168.10.106"
+#ESP32_IP = "192.168.10.106"
+ESP32_IP = "192.168.10.140"
 PORT = 12345
 
 # ================================================================

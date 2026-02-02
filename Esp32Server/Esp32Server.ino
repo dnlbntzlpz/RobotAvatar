@@ -22,12 +22,12 @@ WiFiServer server(12345);
 Servo servo1, servo2, servo3, servo4, servo5, servo6;
 
 // Pines asignados
-const int pin1 = 13;  // Left Joystick - Top Servo
-const int pin2 = 12;  // Left Joystick - Bottom Servo
-const int pin3 = 25;  // Right Joystick - Top Servo
-const int pin4 = 26;  // Right Joystick - Bottom Servo
-const int pin5 = 27;  // Right Action Button Servo
-const int pin6 = 14;  // Left Select Button Servo
+const int pin1 = 3;  // Left Joystick - Top Servo        , old esp:13
+const int pin2 = 4;  // Left Joystick - Bottom Servo     , old esp:12
+const int pin3 = 5;  // Right Joystick - Top Servo       , old esp:25
+const int pin4 = 8;  // Right Joystick - Bottom Servo    , old esp:26
+const int pin5 = 9;  // Right Action Button Servo        , old esp:27
+const int pin6 = 10; // Left Select Button Servo         , old esp:14
 
 // Servo Homes:
 
