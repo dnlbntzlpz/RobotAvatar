@@ -9,7 +9,7 @@ void handleGestureCommand(const String& cmd);
 void handleHandshakeToggle(bool gestureBActive);
 
 // ================================================================
-// ⚙️ CONFIGURACIÓN WiFi
+// ⚙️ Wifi Configuration
 // ================================================================
 const char* ssid = WIFI_SSID;
 const char* password = WIFI_PASS;
@@ -22,17 +22,17 @@ WiFiServer server(12345);
 Servo servo1, servo2, servo3, servo4, servo5, servo6;
 
 // Pines asignados
-const int pin1 = 3;  // Left Joystick - Top Servo        , old esp:13
-const int pin2 = 4;  // Left Joystick - Bottom Servo     , old esp:12
-const int pin3 = 5;  // Right Joystick - Top Servo       , old esp:25
-const int pin4 = 8;  // Right Joystick - Bottom Servo    , old esp:26
-const int pin5 = 9;  // Right Action Button Servo        , old esp:27
-const int pin6 = 10; // Left Select Button Servo         , old esp:14
+const int pin1 = 3;   // Left Joystick - Top Servo        , old esp:13
+const int pin2 = 4;   // Left Joystick - Bottom Servo     , old esp:12
+const int pin3 = 21;  // Right Joystick - Top Servo       , old esp:25
+const int pin4 = 20;  // Right Joystick - Bottom Servo    , old esp:26
+const int pin5 = 10;  // Right Action Button Servo        , old esp:27
+const int pin6 = 5;   // Left Select Button Servo         , old esp:14
 
 // Servo Homes:
 
 // ================================================================
-// 🦾 FUNCIONES DE MOVIMIENTO
+// 🦾 Movement Functions
 // ================================================================
 void moverBrazoIzquierdo(int serv1, int serv2) {
   servo1.write(constrain(serv1, 0, 180));
